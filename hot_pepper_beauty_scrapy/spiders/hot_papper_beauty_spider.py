@@ -7,14 +7,14 @@ class HotPapperBeautySpider(scrapy.Spider):
     allowed_domains = ['beauty.hotpepper.jp', 'work.salonboard.com']
     start_urls = [
         'https://beauty.hotpepper.jp/work/svcSA/',
-        #'https://beauty.hotpepper.jp/work/svcSB/',
-        #'https://beauty.hotpepper.jp/work/svcSC/',
-        #'https://beauty.hotpepper.jp/work/svcSD/',
-        #'https://beauty.hotpepper.jp/work/svcSE/',
-        #'https://beauty.hotpepper.jp/work/svcSF/',
-        #'https://beauty.hotpepper.jp/work/svcSG/',
-        #'https://beauty.hotpepper.jp/work/svcSH/',
-        #'https://beauty.hotpepper.jp/work/svcSI/',
+        'https://beauty.hotpepper.jp/work/svcSB/',
+        'https://beauty.hotpepper.jp/work/svcSC/',
+        'https://beauty.hotpepper.jp/work/svcSD/',
+        'https://beauty.hotpepper.jp/work/svcSE/',
+        'https://beauty.hotpepper.jp/work/svcSF/',
+        'https://beauty.hotpepper.jp/work/svcSG/',
+        'https://beauty.hotpepper.jp/work/svcSH/',
+        'https://beauty.hotpepper.jp/work/svcSI/',
     ]
 
     def parse(self, response):
@@ -26,8 +26,8 @@ class HotPapperBeautySpider(scrapy.Spider):
             yield scrapy.Request(link.get('href'), self.parse_salon_page)
 
         # 次ページへ移動
-        #next_link = soup.find("li", class_="afterPage").findNext('a')
-        #yield scrapy.Request(next_link.get('href'), callback=self.parse)
+        next_link = soup.find("li", class_="afterPage").findNext('a')
+        yield scrapy.Request(next_link.get('href'), callback=self.parse)
 
     def parse_salon_page(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
