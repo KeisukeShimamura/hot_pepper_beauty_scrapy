@@ -33,9 +33,11 @@ class HotPapperBeautySpider(scrapy.Spider):
         soup = BeautifulSoup(response.text, 'html.parser')
 
         item = HotPepperBeautyScrapyItem()
+        item['サロン名'] = soup.h1.get_text()
+        tel_link = None
         for th in soup.find("table", class_="slnDataTbl").find_all("th"):
             if th.get_text() == '電話番号':
-                item["電話番号"] = th.next_element.findNext('td').get_text()
+                tel_link = th.next_element.findNext('td').findNext('a')
             elif th.get_text() == '住所':
                 item["サロン住所"] = th.next_element.findNext('td').get_text()
             elif th.get_text() == 'アクセス・道案内':
@@ -44,7 +46,7 @@ class HotPapperBeautySpider(scrapy.Spider):
                 item["営業時間"] = th.next_element.findNext('td').get_text()
             elif th.get_text() == '定休日':
                 item["定休日"] = th.next_element.findNext('td').get_text()
-            elif th.get_text() == 'クレジットカード	':
+            elif th.get_text() == 'クレジットカード':
                 item["クレジットカード"] = th.next_element.findNext('td').get_text()
             elif th.get_text() == 'お店のホームページ':
                 item["お店のホームページ"] = th.next_element.findNext('td').get_text()
@@ -61,17 +63,29 @@ class HotPapperBeautySpider(scrapy.Spider):
             elif th.get_text() == '備考':
                 item["備考"] = th.next_element.findNext('td').get_text()
 
+        # 電話番号ページ
+        if tel_link is not None:
+            request = scrapy.Request(tel_link.get('href'), self.parse_tel_page)
+            request.meta['item'] = item
+            yield request
+
         # 求人ページ
         job_link = soup.find("a", class_="jscCareerLink")
         request = scrapy.Request(job_link.get('href'), self.parse_job_page)
         request.meta['item'] = item
         yield request
 
+    def parse_tel_page(self, response):
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        item = response.meta['item']
+        item["電話番号"] = soup.find("td").get_text()
+        yield item
+
     def parse_job_page(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
 
         item = response.meta['item']
-        item['サロン名'] = soup.find("p", class_="c-name-salon").get_text()
         item['求人ページurl'] = response.url
         for head in soup.find_all("dt", class_="c-table__head"):
             if head.get_text() == '勤務地':
@@ -102,5 +116,3 @@ class HotPapperBeautySpider(scrapy.Spider):
                 item['設立年月日'] = head.next_element.findNext('pre').contents[0]
             elif head.get_text() == '店舗数':
                 item['店舗数'] = head.next_element.findNext('pre').contents[0]
-
-        yield item
