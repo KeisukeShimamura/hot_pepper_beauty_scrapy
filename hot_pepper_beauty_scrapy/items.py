@@ -9,6 +9,20 @@ import scrapy
 class HotPepperBeautyScrapyItem(scrapy.Item):
     # define the fields for your item here like:
     サロン名 = scrapy.Field()
+    # サロンデータ
+    電話番号 = scrapy.Field()
+    サロン住所 = scrapy.Field()
+    アクセス道案内 = scrapy.Field()
+    営業時間 = scrapy.Field()
+    定休日 = scrapy.Field()
+    クレジットカード = scrapy.Field()
+    お店のホームページ = scrapy.Field()
+    カット価格 = scrapy.Field()
+    席数 = scrapy.Field()
+    スタッフ数 = scrapy.Field()
+    駐車場 = scrapy.Field()
+    こだわり条件 = scrapy.Field()
+    備考 = scrapy.Field()
     # 求人情報
     勤務地 = scrapy.Field()
     雇用形態 = scrapy.Field()
@@ -24,4 +38,4 @@ class HotPepperBeautyScrapyItem(scrapy.Item):
     会社所在地 = scrapy.Field()
     設立年月日 = scrapy.Field()
     店舗数 = scrapy.Field()
-    url = scrapy.Field()
+    求人ページurl = scrapy.Field()

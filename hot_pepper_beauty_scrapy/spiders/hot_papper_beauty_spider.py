@@ -7,33 +7,72 @@ class HotPapperBeautySpider(scrapy.Spider):
     allowed_domains = ['beauty.hotpepper.jp', 'work.salonboard.com']
     start_urls = [
         'https://beauty.hotpepper.jp/work/svcSA/',
-        'https://beauty.hotpepper.jp/work/svcSB/',
-        'https://beauty.hotpepper.jp/work/svcSC/',
-        'https://beauty.hotpepper.jp/work/svcSD/',
-        'https://beauty.hotpepper.jp/work/svcSE/',
-        'https://beauty.hotpepper.jp/work/svcSF/',
-        'https://beauty.hotpepper.jp/work/svcSG/',
-        'https://beauty.hotpepper.jp/work/svcSH/',
-        'https://beauty.hotpepper.jp/work/svcSI/',
+        #'https://beauty.hotpepper.jp/work/svcSB/',
+        #'https://beauty.hotpepper.jp/work/svcSC/',
+        #'https://beauty.hotpepper.jp/work/svcSD/',
+        #'https://beauty.hotpepper.jp/work/svcSE/',
+        #'https://beauty.hotpepper.jp/work/svcSF/',
+        #'https://beauty.hotpepper.jp/work/svcSG/',
+        #'https://beauty.hotpepper.jp/work/svcSH/',
+        #'https://beauty.hotpepper.jp/work/svcSI/',
     ]
 
     def parse(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        job_links = soup.find_all("a", class_="btnSlcViewDetail jscCareerLink")
-        for link in job_links:
-            yield scrapy.Request(link.get('href'), self.parse_job_page)
+        salon_links = soup.find_all("a", class_="slcHeadLink")
+        for link in salon_links:
+            # サロンページへ遷移
+            yield scrapy.Request(link.get('href'), self.parse_salon_page)
 
         # 次ページへ移動
-        next_link = soup.find("li", class_="afterPage").findNext('a')
-        yield scrapy.Request(next_link.get('href'), callback=self.parse)
+        #next_link = soup.find("li", class_="afterPage").findNext('a')
+        #yield scrapy.Request(next_link.get('href'), callback=self.parse)
+
+    def parse_salon_page(self, response):
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        item = HotPepperBeautyScrapyItem()
+        for th in soup.find("table", class_="slnDataTbl").find_all("th"):
+            if th.get_text() == '電話番号':
+                item["電話番号"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '住所':
+                item["サロン住所"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'アクセス・道案内':
+                item["アクセス道案内"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '営業時間':
+                item["営業時間"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '定休日':
+                item["定休日"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'クレジットカード	':
+                item["クレジットカード"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'お店のホームページ':
+                item["お店のホームページ"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'カット価格':
+                item["カット価格"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '席数':
+                item["席数"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'スタッフ数':
+                item["スタッフ数"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '駐車場':
+                item["駐車場"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == 'こだわり条件':
+                item["こだわり条件"] = th.next_element.findNext('td').get_text()
+            elif th.get_text() == '備考':
+                item["備考"] = th.next_element.findNext('td').get_text()
+
+        # 求人ページ
+        job_link = soup.find("a", class_="jscCareerLink")
+        request = scrapy.Request(job_link.get('href'), self.parse_job_page)
+        request.meta['item'] = item
+        yield request
 
     def parse_job_page(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        item = HotPepperBeautyScrapyItem()
+        item = response.meta['item']
         item['サロン名'] = soup.find("p", class_="c-name-salon").get_text()
-        item['url'] = response.url
+        item['求人ページurl'] = response.url
         for head in soup.find_all("dt", class_="c-table__head"):
             if head.get_text() == '勤務地':
                 item['勤務地'] = head.next_element.findNext('pre').contents[0]
