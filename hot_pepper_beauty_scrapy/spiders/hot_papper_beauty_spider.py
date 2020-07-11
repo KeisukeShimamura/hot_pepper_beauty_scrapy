@@ -63,10 +63,17 @@ class HotPapperBeautySpider(scrapy.Spider):
             elif th.get_text() == '備考':
                 item["備考"] = th.next_element.findNext('td').get_text()
 
-        # 電話番号ページへ
-        request = scrapy.Request(tel_link.get('href'), self.parse_tel_page)
-        request.meta['item'] = item
-        yield request
+        if tel_link is not None:
+            # 電話番号ページへ
+            request = scrapy.Request(tel_link.get('href'), self.parse_tel_page)
+            request.meta['item'] = item
+            yield request
+        else:
+            # 求人ページへ
+            job_link = soup.find("a", class_="jscCareerLink")
+            request = scrapy.Request(job_link.get('href'), self.parse_job_page)
+            request.meta['item'] = item
+            yield request
 
     def parse_tel_page(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
