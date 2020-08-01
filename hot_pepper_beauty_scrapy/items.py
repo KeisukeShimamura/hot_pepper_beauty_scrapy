@@ -23,6 +23,7 @@ class HotPepperBeautyScrapyItem(scrapy.Item):
     駐車場 = scrapy.Field()
     こだわり条件 = scrapy.Field()
     備考 = scrapy.Field()
+    サロンページurl = scrapy.Field()
     # 求人情報
     勤務地 = scrapy.Field()
     雇用形態 = scrapy.Field()
