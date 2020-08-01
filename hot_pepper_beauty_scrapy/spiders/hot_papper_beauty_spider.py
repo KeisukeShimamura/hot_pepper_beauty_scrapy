@@ -57,7 +57,7 @@ class HotPapperBeautySpider(scrapy.Spider):
 
     def parse(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
-        print(soup)
+
         salon_h3_list = soup.find_all("h3", class_="slcHead")
         for salon_h3 in salon_h3_list:
             link = salon_h3.find('a')
